@@ -1,9 +1,11 @@
-# multi Version: 1.8.6 (System Threaded Job Queues gets an update!) Also On the github you can check out the old versions of this library! It stems back from 2012 see rambling for more info...
-**Note: The changes section has information on how to use the new features as they come out. Why put the infomation twice on the readme?** Also I added a Testing Branch. That Branch will have the latest updates, but those updates may be unstable. I like to keep the master as bug free as possible</br>
+# multi Version: 1.9.1 (New Integration! luvit) 
 
-# Note SystemThreadedTable's behavior is not stable! I have found the cause of the problem and am currently figuring out a solution... The next update will probably include the fix!
+**NOTE: I have been studying a lot about threading in the past few weeks and have some awesome additions in store! They will take a while to come out though. The goal of the library is still to provide a simple and efficient way to multi task in lua**
+
+**Upcoming Plans:** Adding network support for threading. Kinda like your own lua cloud. This will require the bin, net, and multi library. Once that happens I will include those libraries as a set. This also means that you can expect both a stand alone and joined versions of the libraries.
 
 In Changes you'll find documentation for(In Order):
+- Sterilizing Objects
 - System Threaded Job Queues
 - New mainloop functions
 - System Threaded Tables
@@ -12,20 +14,20 @@ In Changes you'll find documentation for(In Order):
 - Threading related features
 - And backwards compat stuff
 
-My multitasking library for lua</br>
-To install copy the multi folder into your enviroment and you are good to go</br>
-
-It is a pure lua binding if you ingore the integrations and the love2d compat</br>
-
-If you find any bugs or have any issues please let me know :)
-
-If you don't see a table of contents try using the ReadMe.html file. It is eaiser to navigate the readme</br>
+My multitasking library for lua. It is a pure lua binding if you ingore the integrations and the love2d compat. If you find any bugs or have any issues please let me know :). **If you don't see a table of contents try using the ReadMe.html file. It is eaiser to navigate the readme**</br>
 
 [TOC]
 
 INSTALLING
 ----------
+Note: The latest version of lualanes is required if you want to make use of system threads on lua 5.2+. I will update the dependencies for luarocks since this library should work fine on lua 5.2+
+I still need to test though
+To install copy the multi folder into your enviroment and you are good to go</br>
+
+**or** use luarocks
+
 ```
+luarocks install bin -- Inorder to use the new save state stuff
 luarocks install multi
 ```
 Discord
@@ -38,7 +40,10 @@ Planned features/TODO
 - [x] ~~Add system threads for love2d that works like the lanesManager (loveManager, slight differences).~~
 - [x] ~~Improve performance of the library~~
 - [x] ~~Improve coroutine based threading scheduling~~
-- [ ] Improve love2d Idle thread cpu usage... Tricky Look at the rambling section for insight.
+- [ ] Improve love2d Idle thread cpu usage/Fix the performance when using system threads in love2d... Tricky Look at the rambling section for insight.
+- [x] ~~Add more control to coroutine based threading~~
+- [ ] Add more control to system based threading
+- [ ] Make practical examples that show how you can solve real problems
 - [x] ~~Add more features to support module creators~~
 - [x] ~~Make a framework for eaiser thread task distributing~~
 - [x] ~~Fix Error handling on threaded multi objects~~ Non threaded multiobjs will crash your program if they error though! Use multi:newThread() of multi:newSystemThread() if your code can error! Unless you use multi:protect() this however lowers performance!
@@ -46,7 +51,8 @@ Planned features/TODO
 - [ ] sThread.wrap(obj) **May or may not be completed** Theory: Allows interaction in one thread to affect it in another. The addition to threaded tables may make this possible!
 - [ ] SystemThreaded Actors -- After some tests i figured out a way to make this work... It will work slightly different though. This is due to the actor needing to be splittable...
 - [ ] LoadBalancing for system threads (Once SystemThreaded Actors are done)
-- [ ] Add more integrations
+- [x] ~~Add more integrations~~
+- [ ] Fix SystemThreadedTables
 - [ ] Finish the wiki stuff. (11% done)
 - [ ] Test for unknown bugs
 
@@ -54,7 +60,13 @@ Known Bugs/Issues
 -----------------
 In regards to integrations, thread cancellation works slightly different for love2d and lanes. Within love2d I was unable to (To lazy to...) not use the multi library within the thread. A fix for this is to call `multi:Stop()` when you are done with your threaded code! This may change however if I find a way to work around this. In love2d in order to mimic the GLOBAL table I needed the library to constantly sync tha data... You can use the sThread.waitFor(varname), or sThread.hold(func) methods to sync the globals, to get the value instead of using GLOBAL and this could work. If you want to go this route I suggest setting multi.isRunning=true to prevent the auto runner from doing its thing! This will make the multi manager no longer function, but thats the point :P
 
-Another bug concerns the SystemThreadedJobQueue, Only 1 can be used for now... Vreating more may not be a good idea.
+Another bug concerns the SystemThreadedJobQueue, Only 1 can be used for now... Creating more may not be a good idea.
+
+And systemThreadedTables only supports 1 table between the main and worker thread! They do not work when shared between 2 or more threads. If you need that much flexiblity ust the GLOBAL table that all threads have.
+
+For module creators using this library. I suggest using SystemThreadedQueues for data transfer instead of SystemThreadedTables for rapid data transfer, If you plan on having Constants that will always be the same then a table is a good idea! They support up to **n** threads and can be messed with and abused as much as you want :D
+
+Love2D SystemThreadedTAbles do not send love2d userdata, use queues instead for that!
 
 Usage:</br>
 -----
@@ -801,6 +813,56 @@ We did it!	1	2	3</br>
 
 Changes
 -------
+Update: 1.9.1
+Added:
+Integration "multi.integration.luvitManager"
+Limited... Only the basic multi:newSystemThread(...) will work
+Not even data passing will work other than arguments... If using the bin library you can pass tables and function... Even full objects as long as inner recursion is not preasent.
+
+Updated:
+multi:newSystemThread(name,func,...)
+
+It will not pass the ... to the func()
+
+Do not know why this wasn't done in the first place :P
+
+Also multi:getPlatform(will now return "luvit" if using luvit... Though Idk if module creators would use the multi library when inside the luvit enviroment
+Update: 1.9.0
+-------------
+Added:
+- multiobj:ToString() -- returns a string repersenting the object
+- multi:newFromString(str) -- creates an object from a string
+
+Works on threads and regular objects. Requires the latest bin library to work!
+```lua
+talarm=multi:newThreadedAlarm("AlarmTest",5)
+talarm:OnRing(function()
+ 	print("Ring!")
+end)
+bin.new(talarm:ToString()):tofile("test.dat")
+-- multi:newFromString(bin.load("test.dat"))
+```
+-- A more seamless way to use this will be made in the form of state saving.
+This is still a WIP
+processes, timers, timemasters, watchers, and queuers have not been worked on yet
+Update: 1.8.7
+-------------
+Added:
+- multi.timer(func,...)
+
+```lua
+function test(a,b,c)
+	print("Running...")
+    a=0
+    for i=1,1000000000 do
+    	a=a+1
+    end
+    return a,b+c
+end
+print(multi.timer(test,1,2,3))
+print(multi.timer(test,1,2,3))
+-- multi.time returns the time taken then the arguments from the function... Uses unpack so careful of nil values!
+```
 Update: 1.8.6
 -------------
 Added:
@@ -808,6 +870,7 @@ Added:
 - jobQueue:start() is now required Call this after all calls to registerJob()'s. Calling it afterwards will not guarantee your next push job with that job will work. Not calling this will make pushing jobs impossible!
 - Fixed a bug with love2d Threaded Queue
 - Fixed some bugs
+- Old versions of this library! It stems back from 2012 see rambling for more info...
 
 This will run said function in every thread.
 ```lua
