@@ -1,16 +1,16 @@
 -- This file was automatically generated for the LuaDist project.
 
 package = "multi"
-version = "1.8-4"
+version = "1.8-5"
 -- LuaDist source
 source = {
-  tag = "1.8-4",
+  tag = "1.8-5",
   url = "git://github.com/LuaDist-testing/multi.git"
 }
 -- Original source
 -- source = {
 --    url = "git://github.com/rayaman/multi.git",
---    tag = "v1.8.4",
+--    tag = "v1.8.5",
 -- }
 description = {
    summary = "Lua Multi tasking library",
