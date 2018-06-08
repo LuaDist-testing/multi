@@ -1,13 +1,21 @@
+-- This file was automatically generated for the LuaDist project.
+
 package = "multi"
-version = "1.8-2"
+version = "1.8-4"
+-- LuaDist source
 source = {
-   url = "git://github.com/rayaman/multi.git",
-   tag = "v1.8.2",
+  tag = "1.8-4",
+  url = "git://github.com/LuaDist-testing/multi.git"
 }
+-- Original source
+-- source = {
+--    url = "git://github.com/rayaman/multi.git",
+--    tag = "v1.8.4",
+-- }
 description = {
    summary = "Lua Multi tasking library",
    detailed = [[
-      This library contains many methods for multi tasking. From simple side by side code using multi objs, to using coroutine based Threads and System threads(When you have lua lanes installed or are using love2d. Optional) The core of the library works on lua 5.1+ however the systemthreading features are limited to 5.1
+      This library contains many methods for multi tasking. From simple side by side code using multiobjs, to using coroutine based Threads and System threads(When you have lua lanes installed or are using love2d. Optional) The core of the library works on lua 5.1+ however the systemthreading features are limited to 5.1
    ]],
    homepage = "https://github.com/rayaman/multi",
    license = "MIT"
